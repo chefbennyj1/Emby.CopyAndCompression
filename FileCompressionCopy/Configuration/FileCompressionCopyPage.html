@@ -1,0 +1,61 @@
+﻿<div data-role="page" class=" type-interior pluginConfigurationPage FileCompressionCopyPage" data-require="emby-button,emby-input,emby-select,emby-checkbox" data-controller="__plugin/FileCompressionCopyPageJS">
+    <div class="content-primary">
+        
+        <div class="verticalSection verticalSection-extrabottompadding">
+            <div class="" style="width: 50%; margin: auto">
+                <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Directories</h1>
+
+                <div class="inputContainer" style="display: flex; align-items: center; margin: auto; padding-bottom: 3em;">
+                    <div style="flex-grow: 1;">
+                        <label class="inputLabel inputLabelUnfocused" for="autoOrganizeFolderLocation">Emby Auto Organize Folder:</label>
+                        <input is="emby-input" id="autoOrganizeFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
+                    </div>
+                    <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="autoOrganizeFolderLocationDialog" title="autoOrganizeFolderRefresh">
+                        <i class="md-icon">search</i>
+                    </button>
+                </div>
+
+                <div class="inputContainer" style="display: flex; align-items: center; margin: auto;">
+                    <div style="flex-grow: 1;">
+                        <label class="inputLabel inputLabelUnfocused" for="monitoredFolderLocation">Monitored Folder:</label>
+                        <input is="emby-input" id="monitoredFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
+                    </div>
+                    <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="monitoredFolderLocationDialog" title="monitoredFolderRefresh">
+                        <i class="md-icon">search</i>
+                    </button>
+                </div>
+
+                <div class="buttonContainer" style="margin: auto; padding: 5em; width: 50%;">
+                    <button id="saveFolderOptions" is="emby-button" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </div>
+
+            </div>
+            <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Completed Tasks</h1>
+            <!--<div class="paperList scrollY" id="completedItems" style="max-height: 23em; margin: 2em 10em 2em; padding:2em"></div>-->
+            <div class="scrollY" style="max-height: 30em">
+
+                <table class="tblTorrentResults table detailTable" style="width: 100%;">
+                    <thead>
+                        <tr style="text-align: left;">
+
+                            <th class="detailTableHeaderCell" data-priority="3" style="width: 50%">Name</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Complete</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Extention</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Size</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Creation Date</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Move Type</th>
+
+                            <th class="detailTableHeaderCell" data-priority="1"></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="completedItems"></tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
