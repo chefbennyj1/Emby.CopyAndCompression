@@ -12,65 +12,48 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
     {
         private static IProgress<double> Progress { get; set; }
 
-        public static void BeginCopy(string fileFullName, string fileName, IProgress<double> progress,
-            PluginConfiguration config)
+        public static void BeginCopy(string fileFullName, string fileName, IProgress<double> progress, PluginConfiguration config)
         {
             Progress = progress;
 
-            var key = Path.GetFileNameWithoutExtension(fileName);
+            var key          = Path.GetFileNameWithoutExtension(fileName);
+            var extractPath  = config.EmbyAutoOrganizeFolderPath + "\\" + (key);
+            var Source       = new FileInfo(fileName: fileFullName);
+            var Destination  = new FileInfo(extractPath + "\\" + fileName);
 
-            string extractPath = config.EmbyAutoOrganizeFolderPath + "\\" + (key);
-
-            var _source = new FileInfo(fileName: fileFullName);
-            var _destination = new FileInfo(extractPath + "\\" + fileName);
-
-            if (_destination.Exists) _destination.Delete();
+            if (Destination.Exists) Destination.Delete();
 
             Directory.CreateDirectory(extractPath);
 
-            CopyFileCallbackAction myCallback(FileInfo source, FileInfo destination, object state, long totalFileSize,
-                long totalBytesTransferred)
+            CopyFileCallbackAction myCallback(FileInfo source, FileInfo destination, object state, long totalFileSize, long totalBytesTransferred)
             {
                 var p = Math.Round((totalBytesTransferred / (double) totalFileSize) * 100.0, 1);
 
                 Progress.Report(p);
-
+                
                 return CopyFileCallbackAction.Continue;
             }
 
-            CopyFile(_source, _destination, CopyFileOptions.None, myCallback);
+            CopyFile(Source, Destination, CopyFileOptions.None, myCallback);
         }
 
-        private static void CopyFile(FileInfo source, FileInfo destination, CopyFileOptions options,
-            CopyFileCallback callback)
+        private static void CopyFile(FileInfo source, FileInfo destination, CopyFileOptions options, CopyFileCallback callback)
         {
             CopyFile(source, destination, options, callback, null);
         }
 
-        private static void CopyFile(FileInfo source, FileInfo destination,
-            CopyFileOptions options, CopyFileCallback callback, object state)
+        private static void CopyFile(FileInfo source, FileInfo destination, CopyFileOptions options, CopyFileCallback callback, object state)
         {
+
             if (source == null) throw new ArgumentNullException("source");
-            if (destination == null)
-                throw new ArgumentNullException("destination");
-            if ((options & ~CopyFileOptions.All) != 0)
-                throw new ArgumentOutOfRangeException("options");
-
-            /*
-            new FileIOPermission(
-                FileIOPermissionAccess.Read, source.FullName).Demand();
-            new FileIOPermission(
-                FileIOPermissionAccess.Write, destination.FullName).Demand();
-            */
-
-            CopyProgressRoutine cpr = callback == null
-                ? null
-                : new CopyProgressRoutine(new CopyProgressData(
-                    source, destination, callback, state).CallbackHandler);
+            if (destination == null) throw new ArgumentNullException("destination");
+            if ((options & ~CopyFileOptions.All) != 0) throw new ArgumentOutOfRangeException("options");
+            
+            CopyProgressRoutine cpr = callback == null ? null : new CopyProgressRoutine(new CopyProgressData(source, destination, callback, state).CallbackHandler);
 
             bool cancel = false;
-            if (!CopyFileEx(source.FullName, destination.FullName, cpr,
-                IntPtr.Zero, ref cancel, (int) options))
+
+            if (!CopyFileEx(source.FullName, destination.FullName, cpr, IntPtr.Zero, ref cancel, (int) options))
             {
                 throw new IOException(new Win32Exception().Message);
             }
@@ -83,8 +66,7 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
             private readonly CopyFileCallback _callback;
             private readonly object _state;
 
-            public CopyProgressData(FileInfo source, FileInfo destination,
-                CopyFileCallback callback, object state)
+            public CopyProgressData(FileInfo source, FileInfo destination, CopyFileCallback callback, object state)
             {
                 _source = source;
                 _destination = destination;
@@ -100,17 +82,12 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
             }
         }
 
-        private delegate int CopyProgressRoutine(
-            long totalFileSize, long TotalBytesTransferred, long streamSize,
-            long streamBytesTransferred, int streamNumber, int callbackReason,
-            IntPtr sourceFile, IntPtr destinationFile, IntPtr data);
+        private delegate int CopyProgressRoutine(long totalFileSize, long TotalBytesTransferred, long streamSize, long streamBytesTransferred, 
+            int streamNumber, int callbackReason, IntPtr sourceFile, IntPtr destinationFile, IntPtr data);
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern bool CopyFileEx(
-            string lpExistingFileName, string lpNewFileName,
-            CopyProgressRoutine lpProgressRoutine,
-            IntPtr lpData, ref bool pbCancel, int dwCopyFlags);
+        private static extern bool CopyFileEx(string lpExistingFileName, string lpNewFileName, CopyProgressRoutine lpProgressRoutine, IntPtr lpData, ref bool pbCancel, int dwCopyFlags);
     }
 
     public delegate CopyFileCallbackAction CopyFileCallback(
@@ -120,18 +97,18 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
     public enum CopyFileCallbackAction
     {
         Continue = 0,
-        Cancel = 1,
-        Stop = 2,
-        Quiet = 3
+        Cancel   = 1,
+        Stop     = 2,
+        Quiet    = 3
     }
 
     [Flags]
     public enum CopyFileOptions
     {
-        None = 0x0,
-        FailIfDestinationExists = 0x1,
-        Restartable = 0x2,
+        None                      = 0x0,
+        FailIfDestinationExists   = 0x1,
+        Restartable               = 0x2,
         AllowDecryptedDestination = 0x8,
-        All = FailIfDestinationExists | Restartable | AllowDecryptedDestination
+        All                       = FailIfDestinationExists | Restartable | AllowDecryptedDestination
     }
 }

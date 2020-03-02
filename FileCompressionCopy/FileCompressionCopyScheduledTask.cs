@@ -17,16 +17,16 @@ namespace FileCompressionCopy
 {
     public class FileCompressionCopyScheduledTask : IScheduledTask, IConfigurableScheduledTask
     {
-        private ILogger logger { get; set; }
-        private IFileSystem FileSystem { get; set; }
-        private ILogManager LogManager { get; set; }
+        private ILogger logger           { get; set; }
+        private IFileSystem FileSystem   { get; set; }
+        private ILogManager LogManager   { get; set; }
         private ITaskManager TaskManager { get; set; }
 
         // ReSharper disable once TooManyDependencies
         public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager, ITaskManager taskMan)
         {
-            FileSystem = file;
-            LogManager = logManager;
+            FileSystem  = file;
+            LogManager  = logManager;
             TaskManager = taskMan;
         }
 
@@ -38,7 +38,7 @@ namespace FileCompressionCopy
 
             logger = LogManager.GetLogger(Plugin.Instance.Name);
 
-            var directoryInfo = FileSystem.GetDirectories(path: config.MonitoredFolder);
+            var directoryInfo     = FileSystem.GetDirectories(path: config.MonitoredFolder);
 
             var directoryInfoList = directoryInfo.ToList();
 
@@ -75,12 +75,12 @@ namespace FileCompressionCopy
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {
-                                Name = newMediaFolder.Name,
-                                completed = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
-                                size = FileSizeConversions.SizeSuffix(file.Length),
-                                extention = file.Extension,
+                                Name            = newMediaFolder.Name,
+                                completed       = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
+                                size            = FileSizeConversions.SizeSuffix(file.Length),
+                                extention       = file.Extension,
                                 CreationTimeUTC = file.CreationTimeUtc,
-                                CopyType = "Unpacked"
+                                CopyType        = "Unpacked"
                             });
                             break;
 
@@ -96,12 +96,12 @@ namespace FileCompressionCopy
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {
-                                Name = newMediaFolder.Name,
-                                completed = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
-                                size = FileSizeConversions.SizeSuffix(file.Length),
-                                extention = file.Extension,
+                                Name            = newMediaFolder.Name,
+                                completed       = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
+                                size            = FileSizeConversions.SizeSuffix(file.Length),
+                                extention       = file.Extension,
                                 CreationTimeUTC = file.CreationTimeUtc,
-                                CopyType = "Copied"
+                                CopyType        = "Copied"
                             });
                             break;
                     }
@@ -111,8 +111,8 @@ namespace FileCompressionCopy
                 Plugin.Instance.UpdateConfiguration(new PluginConfiguration
                 {
                     EmbyAutoOrganizeFolderPath = config.EmbyAutoOrganizeFolderPath,
-                    MonitoredFolder = config.MonitoredFolder,
-                    CompletedItems = config.CompletedItems
+                    MonitoredFolder            = config.MonitoredFolder,
+                    CompletedItems             = config.CompletedItems
                 });
             }
 
@@ -126,23 +126,22 @@ namespace FileCompressionCopy
                 // Every so often
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerInterval,
+                    Type          = TaskTriggerInfo.TriggerInterval,
                     IntervalTicks = TimeSpan.FromMinutes(5).Ticks
                 }
             };
         }
 
-        public string Name => "Decompression and copy media files";
+        public string Name        => "Decompression and copy media files";
 
-        public string Description =>
-            "Unzip or Copy new files available in the configured watch folder into Emby's Auto Organize folder.";
+        public string Description => "Unzip or Copy new files available in the configured watch folder into Emby's Auto Organize folder.";
 
-        public string Category => "Library";
+        public string Category    => "Library";
 
-        public string Key => "FileCompressionCopy";
+        public string Key         => "FileCompressionCopy";
 
-        public bool IsHidden => false;
-        public bool IsEnabled => true;
-        public bool IsLogged => true;
+        public bool IsHidden      => false;
+        public bool IsEnabled     => true;
+        public bool IsLogged      => true;
     }
 }
