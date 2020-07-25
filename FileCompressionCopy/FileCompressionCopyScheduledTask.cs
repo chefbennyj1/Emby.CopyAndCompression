@@ -18,46 +18,46 @@ namespace FileCompressionCopy
     public class FileCompressionCopyScheduledTask : IScheduledTask, IConfigurableScheduledTask
     {
         private ILogger logger           { get; set; }
-        private IFileSystem FileSystem   { get; set; }
-        private ILogManager LogManager   { get; set; }
-        private ITaskManager TaskManager { get; set; }
+        private IFileSystem FileSystem   { get; }
+        private ILogManager LogManager   { get; }
 
         // ReSharper disable once TooManyDependencies
-        public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager, ITaskManager taskMan)
+        public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager)
         {
             FileSystem  = file;
             LogManager  = logManager;
-            TaskManager = taskMan;
         }
 
         public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
         {
             var config = Plugin.Instance.Configuration;
 
-            if (Equals(config.MonitoredFolder, null) || Equals(config.EmbyAutoOrganizeFolderPath, null)) return;
+            if (config.MonitoredFolder is null || config.EmbyAutoOrganizeFolderPath is null) return;
 
             logger = LogManager.GetLogger(Plugin.Instance.Name);
 
-            var directoryInfo     = FileSystem.GetDirectories(path: config.MonitoredFolder);
 
-            var directoryInfoList = directoryInfo.ToList();
+            var monitoredDirectoryInfo     = FileSystem.GetDirectories(path: config.MonitoredFolder);
 
-            logger.Info("Found: " + directoryInfoList.Count() + " folders in " + config.MonitoredFolder);
+            var monitoredDirectoryContents = monitoredDirectoryInfo.ToList();
+            
 
-            foreach (var newMediaFolder in directoryInfoList)
+            logger.Info("Found: " + monitoredDirectoryContents.Count() + " folders in " + config.MonitoredFolder);
+            
+
+            foreach (var mediaFolder in monitoredDirectoryContents)
             {
-                if (FileSystem.FileExists(newMediaFolder.FullName + "\\####emby.extracted####")) continue;
+                //Ignore this directory if there is an 'extraction marker' file present because we have already extracted the contents of this folder.
+                if (FileSystem.FileExists(mediaFolder.FullName + "\\####emby.extracted####")) continue;
+                
 
-                logger.Info("New media file: " + newMediaFolder.FullName);
+                logger.Info("New media folder: " + mediaFolder.FullName);
 
-                logger.Info("Creating compression marker " + newMediaFolder.FullName + "\\####emby.extracted####");
+                
+                CreateExtractionMarker(mediaFolder.FullName, logger);
 
-                using (var sr = new StreamWriter(newMediaFolder.FullName + "\\####emby.extracted####"))
-                {
-                    sr.Flush();
-                }
 
-                var newMediaFiles = FileSystem.GetFiles(newMediaFolder.FullName);
+                var newMediaFiles = FileSystem.GetFiles(mediaFolder.FullName);
 
                 foreach (var file in newMediaFiles)
                 {
@@ -68,39 +68,37 @@ namespace FileCompressionCopy
                     switch (file.Extension)
                     {
                         case ".rar":
-                            logger.Info("Found new compressed file to decompress: " + file.Name);
+
+                            logger.Info("Found new compressed file to extract: " + file.Name);
                             await Task.Run(
-                                () => UnzipAndCopyFiles.BeginDecompressionAndCopy(file.FullName, file.Name, logger,
+                                () => UnzipAndCopyFiles.BeginCompressedFileExtraction(file.FullName, file.Name, logger,
                                     progress, config), cancellationToken);
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {
-                                Name            = newMediaFolder.Name,
-                                completed       = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
+                                Name            = mediaFolder.Name,
+                                completed       = DateTime.Now,
                                 size            = FileSizeConversions.SizeSuffix(file.Length),
-                                extention       = file.Extension,
-                                CreationTimeUTC = file.CreationTimeUtc,
+                                extension       = file.Extension,
                                 CopyType        = "Unpacked"
                             });
                             break;
 
-                        // ReSharper disable RedundantCaseLabel
                         case ".mkv":
                         case ".avi":
                         case ".mp4":
 
-                            logger.Info("Found New File to Copy: " + file.Name);
+                            logger.Info("Found new file to copy: " + file.Name);
                             await Task.Run(
-                                () => CopyFiles.BeginCopy(file.FullName, file.Name, progress,
+                                () => CopyFiles.BeginFileCopy(file.FullName, file.Name, progress,
                                     Plugin.Instance.Configuration), cancellationToken);
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {
-                                Name            = newMediaFolder.Name,
-                                completed       = DateTime.Now.ToString("yyyy-M-dd--HH:mm-ss"),
+                                Name            = mediaFolder.Name,
+                                completed       = DateTime.Now,
                                 size            = FileSizeConversions.SizeSuffix(file.Length),
-                                extention       = file.Extension,
-                                CreationTimeUTC = file.CreationTimeUtc,
+                                extension       = file.Extension,
                                 CopyType        = "Copied"
                             });
                             break;
@@ -112,11 +110,32 @@ namespace FileCompressionCopy
                 {
                     EmbyAutoOrganizeFolderPath = config.EmbyAutoOrganizeFolderPath,
                     MonitoredFolder            = config.MonitoredFolder,
-                    CompletedItems             = config.CompletedItems
+                    CompletedItems             = CleanUpCompletedItemsList(config.CompletedItems)
                 });
             }
-
+            
             progress.Report(100);
+            
+        }
+
+        private static List<ExtractionInfo> CleanUpCompletedItemsList(List<ExtractionInfo> completedItems)
+        {
+
+            foreach (var task in completedItems)
+            {
+                if (task.completed < DateTime.Now.AddDays(-30))
+                {
+                    completedItems.Remove(task);
+                }
+            }
+
+            return completedItems;
+        }
+
+        private static void CreateExtractionMarker(string folderPath, ILogger logger)
+        {
+            logger.Info("Creating extraction marker " + folderPath + "\\####emby.extracted####");
+            using (var sr = new StreamWriter(folderPath + "\\####emby.extracted####")) { sr.Flush(); }
         }
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()

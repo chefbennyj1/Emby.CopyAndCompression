@@ -12,13 +12,12 @@ namespace FileCompressionCopy
 {
     public class Plugin : BasePlugin<PluginConfiguration>, IHasThumbImage, IHasWebPages
     {
-        public static Plugin Instance { get; set; }
+        public static Plugin Instance { get; private set; }
+
+
         public ImageFormat ThumbImageFormat => ImageFormat.Jpg;
-
-        private readonly Guid _id = new Guid("D8B538E4-5579-4239-A251-721BC3AB4D9D");
-        public override Guid Id => _id;
-
-        public override string Name => "Copy and Decompression";
+        public override Guid Id             => new Guid("D8B538E4-5579-4239-A251-721BC3AB4D9D");
+        public override string Name         => "Copy and Decompression";
 
 
         public Stream GetThumbImage()
@@ -27,8 +26,7 @@ namespace FileCompressionCopy
             return type.Assembly.GetManifestResourceStream(type.Namespace + ".thumb.jpg");
         }
 
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer) : base(applicationPaths,
-            xmlSerializer)
+        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer) : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
         }

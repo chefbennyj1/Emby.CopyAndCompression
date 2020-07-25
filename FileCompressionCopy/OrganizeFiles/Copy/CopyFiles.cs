@@ -12,7 +12,7 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
     {
         private static IProgress<double> Progress { get; set; }
 
-        public static void BeginCopy(string fileFullName, string fileName, IProgress<double> progress, PluginConfiguration config)
+        public static void BeginFileCopy(string fileFullName, string fileName, IProgress<double> progress, PluginConfiguration config)
         {
             Progress = progress;
 

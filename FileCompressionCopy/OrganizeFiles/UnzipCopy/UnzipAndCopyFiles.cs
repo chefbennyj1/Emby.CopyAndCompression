@@ -14,18 +14,19 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
         private static long totalSize             { get; set; }
         private static IProgress<double> Progress { get; set; }
 
-        public static void BeginDecompressionAndCopy(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config)
+        public static void BeginCompressedFileExtraction(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config)
         {
             Progress = prog;
             log.Info("Found New RAR File to Decompress: " + fileName);
 
-            string extractPath = config.EmbyAutoOrganizeFolderPath + "\\" +
-                                 (Path.GetFileNameWithoutExtension(fileName));
+            string extractPath = $"{config.EmbyAutoOrganizeFolderPath}\\{Path.GetFileNameWithoutExtension(fileName)}";
 
             log.Info("Creating Extraction Path: " + extractPath);
 
             Directory.CreateDirectory(extractPath);
-            IArchive archive = ArchiveFactory.Open(fullFileName);
+
+            var archive = ArchiveFactory.Open(fullFileName);
+
             log.Info("Archive open: " + fullFileName);
 
             // Calculate the total extraction size.

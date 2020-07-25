@@ -5,8 +5,7 @@
         var autoOrganizeFolderLocationInput;
         var monitoredFolderLocationInput;
         var saveFolderOptionsButton;
-        var completedItems;
-
+        var completedItems; 
 
         function openDialog(element, view) {
 
@@ -54,8 +53,7 @@
                     html += '</div>';
                     html += '</div>';
                     html += '<div class="formDialogFooter" style="padding-top:2em">';
-                    html +=
-                        '<button id="savePath" style="width: 50%;" is="emby-button" type="submit" class="raised button-submit block formDialogFooterItem emby-button">Ok</button>';
+                    html += '<button id="savePath" style="width: 50%;" is="emby-button" type="submit" class="raised button-submit block formDialogFooterItem emby-button">Ok</button>';
                     html += '</div>';
 
                     dlg.innerHTML = html;
@@ -160,30 +158,15 @@
         }
 
         function getCompletedTasksHtml(extractionInfo) {
+
             var html = '';
 
-            html += '<td data-title="Name" class="detailTableBodyCell fileCell">' + extractionInfo.Name + '</td>';
-            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">' + extractionInfo.completed + '</td>';
-            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">' + extractionInfo.extention + '</td>';
-            html += '<td data-title="Size" class="detailTableBodyCell fileCell">' + extractionInfo.size + '</td>';
-            html += '<td data-title="Creation Time" class="detailTableBodyCell fileCell">' + extractionInfo.CreationTimeUTC + '</td>';
-            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType + '</td>';
-
-
-            /*
-            html += '<div id="' + extractionInfo.Name + '" class="listItem listItem-border">';
-            html += '<div class="listItemBody two-line">';
-            html += '<h3 class="listItemBodyText">';
-            html += extractionInfo.Name;
-            html += '</h3>';
-            html += '<div class="listItemBodyText-secondary listItemBodyText">Completed:';
-            html += extractionInfo.completed;
-            html += '</div>';
-            html += '</div>';
-            html += '</div>';
-            */
-
-
+            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'          + extractionInfo.Name            + '</td>';
+            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'      + extractionInfo.completed       + '</td>';
+            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">'     + extractionInfo.extension       + '</td>';
+            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'          + extractionInfo.size            + '</td>';
+            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">'     + extractionInfo.CopyType        + '</td>';
+            
             return html;
         }
         
