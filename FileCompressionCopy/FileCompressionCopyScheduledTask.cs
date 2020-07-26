@@ -9,6 +9,7 @@ using FileCompressionCopy.Helpers;
 using FileCompressionCopy.OrganizeFiles;
 using FileCompressionCopy.OrganizeFiles.Copy;
 using FileCompressionCopy.OrganizeFiles.UnzipCopy;
+using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Logging;
 using MediaBrowser.Model.Tasks;
@@ -20,12 +21,13 @@ namespace FileCompressionCopy
         private ILogger logger           { get; set; }
         private IFileSystem FileSystem   { get; }
         private ILogManager LogManager   { get; }
-
+        private ISessionManager SessionManager { get; set; }
         // ReSharper disable once TooManyDependencies
-        public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager)
+        public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager, ISessionManager sesMan)
         {
             FileSystem  = file;
             LogManager  = logManager;
+            SessionManager = sesMan;
         }
 
         public async Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
@@ -72,7 +74,7 @@ namespace FileCompressionCopy
                             logger.Info("Found new compressed file to extract: " + file.Name);
                             await Task.Run(
                                 () => UnzipAndCopyFiles.BeginCompressedFileExtraction(file.FullName, file.Name, logger,
-                                    progress, config), cancellationToken);
+                                    progress, config, SessionManager), cancellationToken);
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {

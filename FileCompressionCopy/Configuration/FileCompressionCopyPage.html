@@ -36,6 +36,19 @@
             <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Completed Tasks</h1>
             <div class="infoBanner flex align-items-center" style="margin:1em 0; width:50%"><i class="md-icon" style="font-size:1.7em;margin-right:.25em;">error</i>Items will be removed from list 30 days after extraction.</div>
 
+            <div id="currentExtraction" class="hide">
+                <h3>Current extraction: <span id="currentExtractionName"></span></h3>
+                <div id="taskProgressExtraction">
+                    <div style="display: flex; align-items: center;">
+                        <div class="taskProgressOuter" title="" style="flex-grow: 1;">
+                            <div class="taskProgressInner" style="width: 0;">
+                            </div>
+                        </div>
+                        <span style="margin-left: .25em;"></span>
+                    </div>
+                </div>
+            </div>
+
             <div class="scrollY" style="max-height: 30em">
                 <table class="tblTorrentResults table detailTable" style="width: 100%;">
                     <thead>
@@ -45,12 +58,8 @@
                             <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Extension</th>
                             <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Size</th>
                             <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Move Type</th>
-
-                            <th class="detailTableHeaderCell" data-priority="1"></th>
                         </tr>
-
                     </thead>
-
                     <tbody id="completedItems"></tbody>
                 </table>
             </div>

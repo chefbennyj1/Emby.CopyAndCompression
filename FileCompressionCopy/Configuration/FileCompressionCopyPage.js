@@ -171,18 +171,23 @@
               
             return hours + " hours " + minutes + " minutes ago";
         }
-             
-        function getCompletedTasksHtml(extractionInfo) {
 
-            
+        
+        function getCompletedTasksHtml(config) {
+             
             var html = '';
 
-            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'      + extractionInfo.Name                          + '</td>';
-            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'  + timeSinceExtracted(extractionInfo.completed) + '</td>';
-            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">' + extractionInfo.extension                     + '</td>';
-            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'      + extractionInfo.size                          + '</td>';
-            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType                      + '</td>';
-            
+
+            config.CompletedItems.forEach((extractionInfo) => {
+                html += '<tr>';
+                html += '<td data-title="Name" id="' + extractionInfo.Name + '" class="detailTableBodyCell fileCell">' + extractionInfo.Name + '</td>';
+                html += '<td data-title="Complete" class="detailTableBodyCell fileCell">' + timeSinceExtracted(extractionInfo.completed) + '</td>';
+                html += '<td data-title="Extension" class="detailTableBodyCell fileCell">' + extractionInfo.extension + '</td>';
+                html += '<td data-title="Size" class="detailTableBodyCell fileCell">' + extractionInfo.size + '</td>';
+                html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType + '</td>';
+                html += '</tr>'
+            }); 
+
             return html;
         }
         
@@ -194,11 +199,9 @@
             }
 
             if (config.CompletedItems) {
-                completedItems = view.querySelector('#completedItems');
-                config.CompletedItems.forEach((item) => {
-                    completedItems.innerHTML += getCompletedTasksHtml(item);
-                });
+                view.querySelector('#completedItems').innerHTML = getCompletedTasksHtml(config);
             }
+
         }
 
         function loadConfig(view) {
@@ -235,6 +238,24 @@
                             });
                             loading.hide();
                         });
+
+                    ApiClient._webSocket.addEventListener('message', function (message) {
+
+                        var json = JSON.parse(message.data);
+
+                        if (json.MessageType === "ExtractionProgress") {
+                            if (json.Data.Progress == "100.0") {
+                                view.querySelector('#currentExtraction').classList.add('hide');
+                                view.querySelector('#completedItems').innerHTML = getCompletedTasksHtml(config);
+                                return;
+                            }
+                            view.querySelector('#currentExtraction').classList.remove('hide');
+                            view.querySelector('#taskProgressExtraction > div > span').innerHTML = json.Data.Progress + "%";
+                            view.querySelector('.taskProgressInner').style = "width: " + json.Data.Progress + "%"; 
+                            view.querySelector('#currentExtractionName').innerHTML = json.Data.Name;  
+                        }
+                    });
+
                 });
 
 

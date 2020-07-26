@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using FileCompressionCopy.Configuration;
+using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Logging;
 using SharpCompress.Archives;
 using SharpCompress.Common;
@@ -9,15 +11,23 @@ using SharpCompress.Common;
 // ReSharper disable TooManyArguments
 namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
 {
+    
     public class UnzipAndCopyFiles
     {
-        private static long totalSize             { get; set; }
-        private static IProgress<double> Progress { get; set; }
+        private static long totalSize                 { get; set; }
+        private static ExtractionInfo CurrentObjective { get; set; }
+        private static IProgress<double> Progress     { get; set; }
+        private static ISessionManager SessionManager { get; set; }
 
-        public static void BeginCompressedFileExtraction(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config)
+        public static void BeginCompressedFileExtraction(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config, ISessionManager sesMan)
         {
-            Progress = prog;
+
+            Progress       = prog;
+            SessionManager = sesMan;
+
             log.Info("Found New RAR File to Decompress: " + fileName);
+
+            CurrentObjective = new ExtractionInfo { Name = Path.GetFileNameWithoutExtension(fileName) };
 
             string extractPath = $"{config.EmbyAutoOrganizeFolderPath}\\{Path.GetFileNameWithoutExtension(fileName)}";
 
@@ -50,7 +60,10 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
         {
             long compressedBytesRead = e.CompressedBytesRead;
             double compressedPercent = (compressedBytesRead / (double)totalSize) * 100;
-            
+
+            CurrentObjective.Progress = Math.Round(compressedPercent, 1);
+            SessionManager.SendMessageToAdminSessions("ExtractionProgress", CurrentObjective, CancellationToken.None);
+
             Progress.Report(Math.Round(compressedPercent, 1));
         }
 
