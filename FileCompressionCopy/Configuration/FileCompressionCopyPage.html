@@ -1,59 +1,61 @@
 ﻿<div data-role="page" class=" type-interior pluginConfigurationPage FileCompressionCopyPage" data-require="emby-button,emby-input,emby-select,emby-checkbox" data-controller="__plugin/FileCompressionCopyPageJS">
     <div class="content-primary">
-       
-            <div class="verticalSection verticalSection-extrabottompadding">
-                <form>
-                    <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Directories</h1>
 
-                    <div class="inputContainer" style="display: flex; align-items: center; margin: auto; padding-bottom: 3em;">
-                        <div style="flex-grow: 1;">
-                            <label class="inputLabel inputLabelUnfocused" for="autoOrganizeFolderLocation">Emby Auto Organize Folder:</label>
-                            <input id="autoOrganizeFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
-                        </div>
-                        <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="autoOrganizeFolderLocationDialog" title="autoOrganizeFolderRefresh">
-                            <i class="md-icon">search</i>
-                        </button>
+        <div class="verticalSection verticalSection-extrabottompadding">
+            <form>
+                <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Directories</h1>
+
+                <div class="inputContainer" style="display: flex; align-items: center; margin: auto; padding-bottom: 3em;">
+                    <div style="flex-grow: 1;">
+                        <label class="inputLabel inputLabelUnfocused" for="autoOrganizeFolderLocation">Emby Auto Organize Folder:</label>
+                        <input id="autoOrganizeFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
                     </div>
-
-                    <div class="inputContainer" style="display: flex; align-items: center; margin: auto;">
-                        <div style="flex-grow: 1;">
-                            <label class="inputLabel inputLabelUnfocused" for="monitoredFolderLocation">Monitored Folder:</label>
-                            <input id="monitoredFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
-                        </div>
-                        <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="monitoredFolderLocationDialog" title="monitoredFolderRefresh">
-                            <i class="md-icon">search</i>
-                        </button>
-                    </div>
-
-                    <div class="buttonContainer" style="padding: 3em;">
-                        <button id="saveFolderOptions" is="emby-button" class="raised button-submit block emby-button">
-                            <span>Save</span>
-                        </button>
-                    </div>
-
-                </form>
-
-                <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Completed Tasks</h1>
-                <div class="scrollY" style="max-height: 30em">
-                    <table class="tblTorrentResults table detailTable" style="width: 100%;">
-                        <thead>
-                            <tr style="text-align: left;">
-                                <th class="detailTableHeaderCell" data-priority="3" style="width: 50%">Name</th>
-                                <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Complete</th>
-                                <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Extension</th>
-                                <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Size</th>
-                                <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Move Type</th>
-
-                                <th class="detailTableHeaderCell" data-priority="1"></th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="completedItems"></tbody>
-                    </table>
+                    <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="autoOrganizeFolderLocationDialog" title="autoOrganizeFolderRefresh">
+                        <i class="md-icon">search</i>
+                    </button>
                 </div>
 
+                <div class="inputContainer" style="display: flex; align-items: center; margin: auto;">
+                    <div style="flex-grow: 1;">
+                        <label class="inputLabel inputLabelUnfocused" for="monitoredFolderLocation">Monitored Folder:</label>
+                        <input id="monitoredFolderLocation" type="text" required="required" label="Folder:" class="emby-input">
+                    </div>
+                    <button is="paper-icon-button-light" class="emby-input-iconbutton paper-icon-button-light" id="monitoredFolderLocationDialog" title="monitoredFolderRefresh">
+                        <i class="md-icon">search</i>
+                    </button>
+                </div>
+
+                <div class="buttonContainer" style="padding: 3em;">
+                    <button id="saveFolderOptions" is="emby-button" class="raised button-submit block emby-button">
+                        <span>Save</span>
+                    </button>
+                </div>
+
+            </form>
+
+            <h1 style="display: flex; align-items: center; margin: auto; padding-bottom: 1em;">Completed Tasks</h1>
+            <div class="infoBanner flex align-items-center" style="margin:1em 0; width:50%"><i class="md-icon" style="font-size:1.7em;margin-right:.25em;">error</i>Items will be removed from list 30 days after extraction.</div>
+
+            <div class="scrollY" style="max-height: 30em">
+                <table class="tblTorrentResults table detailTable" style="width: 100%;">
+                    <thead>
+                        <tr style="text-align: left;">
+                            <th class="detailTableHeaderCell" data-priority="3" style="width: 35%">Name</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Complete</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Extension</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 5%">Size</th>
+                            <th class="detailTableHeaderCell" data-priority="1" style="width: 10%">Move Type</th>
+
+                            <th class="detailTableHeaderCell" data-priority="1"></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="completedItems"></tbody>
+                </table>
             </div>
-       
+
+        </div>
+
     </div>
 </div>
