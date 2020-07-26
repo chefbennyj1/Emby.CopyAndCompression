@@ -157,15 +157,29 @@
             return html;
         }
 
+        function msToTime(completed) {
+
+            var duration = Date.now() - new Date(completed)
+
+            var  minutes = parseInt((duration / (1000 * 60)) % 60)
+            var hours    = parseInt((duration / (1000 * 60 * 60)) % 24);
+
+            hours   = (hours < 10)   ? "0" + hours   : hours;
+            minutes = (minutes < 10) ? "0" + minutes : minutes;
+              
+            return hours + " hours " + minutes + " minutes ago";
+        }
+             
         function getCompletedTasksHtml(extractionInfo) {
 
+            
             var html = '';
 
-            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'          + extractionInfo.Name            + '</td>';
-            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'      + extractionInfo.completed       + '</td>';
-            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">'     + extractionInfo.extension       + '</td>';
-            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'          + extractionInfo.size            + '</td>';
-            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">'     + extractionInfo.CopyType        + '</td>';
+            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'      + extractionInfo.Name                + '</td>';
+            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'  + msToTime(extractionInfo.completed) + '</td>';
+            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">' + extractionInfo.extension           + '</td>';
+            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'      + extractionInfo.size                + '</td>';
+            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType            + '</td>';
             
             return html;
         }
