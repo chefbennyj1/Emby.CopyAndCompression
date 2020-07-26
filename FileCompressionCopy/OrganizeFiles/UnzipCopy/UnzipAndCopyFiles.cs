@@ -35,7 +35,7 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
 
             foreach (IArchiveEntry entry in archive.Entries.Where(entry => !entry.IsDirectory))
             {
-                archive.EntryExtractionEnd += FileMoveSuccess;
+                archive.EntryExtractionEnd  += FileMoveSuccess;
                 archive.CompressedBytesRead += Archive_CompressedBytesRead;
 
                 entry.WriteToDirectory(extractPath, new ExtractionOptions
@@ -46,12 +46,12 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
             }
         }
 
-
         private static void Archive_CompressedBytesRead(object sender, CompressedBytesReadEventArgs e)
         {
-            long b = e.CompressedBytesRead;
-            var p  = Math.Round((e.CompressedBytesRead / (double) totalSize) * 100, 1);
-            Progress.Report(p);
+            long compressedBytesRead = e.CompressedBytesRead;
+            double compressedPercent = (compressedBytesRead / (double)totalSize) * 100;
+            
+            Progress.Report(Math.Round(compressedPercent, 1));
         }
 
         private static void FileMoveSuccess(object sender, ArchiveExtractionEventArgs<IArchiveEntry> e)

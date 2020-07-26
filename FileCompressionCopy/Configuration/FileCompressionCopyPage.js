@@ -12,15 +12,18 @@
             var path = "";
             var title = element.id === "monitoredFolderLocationDialog" ? "Monitored Folder" : "Emby Auto Organize Folder";
             var dlg = dialogHelper.createDialog({
-                size: "medium-tall",
+
+                size         : "medium-tall",
                 removeOnClose: !0,
                 scrollY: !1
+
             });
 
             dlg.classList.add("formDialog");
             dlg.classList.add("ui-body-a");
             dlg.classList.add("background-theme-a");
             dlg.classList.add("directoryPicker");
+
             ApiClient.getJSON(ApiClient.getUrl("/Environment/Drives")).then(
                 (result) => {
 
@@ -37,8 +40,7 @@
                     html += '<form style="margin:auto;">';
                     html += '<div class="inputContainer" style="display: flex; align-items: center;">';
                     html += '<div style="flex-grow:1;">';
-                    html +=
-                        '<div id="folderBrowser" class="results paperList" style="max-height: 30em; overflow-y: auto;">';
+                    html += '<div id="folderBrowser" class="results paperList" style="max-height: 30em; overflow-y: auto;">';
 
                     html += getDirectoryBrowserListItem({ Name: "Network", Path: "Network" });
 
@@ -157,7 +159,7 @@
             return html;
         }
 
-        function msToTime(completed) {
+        function timeSinceExtracted(completed) {
 
             var duration = Date.now() - new Date(completed)
 
@@ -175,11 +177,11 @@
             
             var html = '';
 
-            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'      + extractionInfo.Name                + '</td>';
-            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'  + msToTime(extractionInfo.completed) + '</td>';
-            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">' + extractionInfo.extension           + '</td>';
-            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'      + extractionInfo.size                + '</td>';
-            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType            + '</td>';
+            html += '<td data-title="Name" class="detailTableBodyCell fileCell">'      + extractionInfo.Name                          + '</td>';
+            html += '<td data-title="Complete" class="detailTableBodyCell fileCell">'  + timeSinceExtracted(extractionInfo.completed) + '</td>';
+            html += '<td data-title="Extention" class="detailTableBodyCell fileCell">' + extractionInfo.extension                     + '</td>';
+            html += '<td data-title="Size" class="detailTableBodyCell fileCell">'      + extractionInfo.size                          + '</td>';
+            html += '<td data-title="Move Type" class="detailTableBodyCell fileCell">' + extractionInfo.CopyType                      + '</td>';
             
             return html;
         }
@@ -187,7 +189,7 @@
         function loadPageData(view, config) {
 
             if (config.MonitoredFolder) {
-                monitoredFolderLocationInput.value = config.MonitoredFolder;
+                monitoredFolderLocationInput.value    = config.MonitoredFolder;
                 autoOrganizeFolderLocationInput.value = config.EmbyAutoOrganizeFolderPath;
             }
 
