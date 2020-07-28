@@ -163,13 +163,15 @@
 
             var duration = Date.now() - new Date(completed)
 
-            var minutes = parseInt((duration / (1000 * 60)) % 60)
+            var minutes = parseInt((duration / (1000 * 60)) % 60);
             var hours   = parseInt((duration / (1000 * 60 * 60)) % 24);
+            var days    = parseInt((duration / (1000 * 60 * 60 * 24) % 24));
 
+            days    = (days >= 0)    ? days : 0;
             hours   = (hours < 10)   ? "0" + hours   : hours;
             minutes = (minutes < 10) ? "0" + minutes : minutes;
               
-            return hours + " hours " + minutes + " minutes ago";
+            return days + " days " + hours + " hours " + minutes + " minutes ago";
         }
 
         
