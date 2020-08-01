@@ -5,7 +5,7 @@
         var autoOrganizeFolderLocationInput;
         var monitoredFolderLocationInput;
         var saveFolderOptionsButton;
-        var completedItems; 
+         
 
         function openDialog(element, view) {
 
@@ -179,7 +179,6 @@
              
             var html = '';
 
-
             config.CompletedItems.forEach((extractionInfo) => {
                 html += '<tr>';
                 html += '<td data-title="Name" id="' + extractionInfo.Name + '" class="detailTableBodyCell fileCell">' + extractionInfo.Name + '</td>';
@@ -204,13 +203,14 @@
                 view.querySelector('#completedItems').innerHTML = getCompletedTasksHtml(config);
             }
 
+            loading.hide();
+
         }
 
         function loadConfig(view) {
             ApiClient.getPluginConfiguration(pluginId).then(
                 (config) => {
-                    loadPageData(view, config);
-                    loading.hide();
+                    loadPageData(view, config); 
                 });
         }
 
@@ -218,6 +218,8 @@
 
             view.addEventListener('viewshow',
                 () => {
+
+                    loading.show();
 
                     loadConfig(view);
 
@@ -252,9 +254,10 @@
                                 return;
                             }
                             view.querySelector('#currentExtraction').classList.remove('hide');
+
                             view.querySelector('#taskProgressExtraction > div > span').innerHTML = json.Data.Progress + "%";
-                            view.querySelector('.taskProgressInner').style = "width: " + json.Data.Progress + "%"; 
-                            view.querySelector('#currentExtractionName').innerHTML = json.Data.Name;  
+                            view.querySelector('.taskProgressInner').style                       = "width: " + json.Data.Progress + "%"; 
+                            view.querySelector('#currentExtractionName').innerHTML               = json.Data.Name;  
                         }
                     });
 

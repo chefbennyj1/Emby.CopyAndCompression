@@ -3,18 +3,26 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Threading;
 using FileCompressionCopy.Configuration;
+using MediaBrowser.Controller.Session;
 
 // ReSharper disable ComplexConditionExpression
+// ReSharper disable TooManyArguments
+// ReSharper disable TooManyDependencies
+
 namespace FileCompressionCopy.OrganizeFiles.Copy
 {
     public static class CopyFiles
     {
-        private static IProgress<double> Progress { get; set; }
+        private static ExtractionInfo CurrentObjective { get; set; }
+        private static IProgress<double> Progress      { get; set; }
+        private static ISessionManager SessionManager  { get; set; }
 
-        public static void BeginFileCopy(string fileFullName, string fileName, IProgress<double> progress, PluginConfiguration config)
+        public static void BeginFileCopy(string fileFullName, string fileName, IProgress<double> progress, PluginConfiguration config, ISessionManager sessionManager)
         {
-            Progress = progress;
+            Progress       = progress;
+            SessionManager = sessionManager;
 
             var key          = Path.GetFileNameWithoutExtension(fileName);
             var extractPath  = config.EmbyAutoOrganizeFolderPath + "\\" + (key);
@@ -25,16 +33,21 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
 
             Directory.CreateDirectory(extractPath);
 
-            CopyFileCallbackAction myCallback(FileInfo source, FileInfo destination, object state, long totalFileSize, long totalBytesTransferred)
-            {
-                var p = Math.Round((totalBytesTransferred / (double) totalFileSize) * 100.0, 1);
+            CurrentObjective = new ExtractionInfo { Name = Path.GetFileNameWithoutExtension(fileName) };
+            
 
-                Progress.Report(p);
+            CopyFileCallbackAction MyCallback(FileInfo source, FileInfo destination, object state, long totalFileSize, long totalBytesTransferred)
+            {
+                CurrentObjective.Progress = Math.Round((totalBytesTransferred / (double) totalFileSize) * 100.0, 1);
                 
-                return CopyFileCallbackAction.Continue;
+                SessionManager.SendMessageToAdminSessions("ExtractionProgress", CurrentObjective, CancellationToken.None);
+
+                Progress.Report(CurrentObjective.Progress);
+                
+                return CopyFileCallbackAction.CONTINUE;
             }
 
-            CopyFile(Source, Destination, CopyFileOptions.None, myCallback);
+            CopyFile(Source, Destination, CopyFileOptions.NONE, MyCallback);
         }
 
         private static void CopyFile(FileInfo source, FileInfo destination, CopyFileOptions options, CopyFileCallback callback)
@@ -42,18 +55,20 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
             CopyFile(source, destination, options, callback, null);
         }
 
+       
+        // ReSharper disable once FlagArgument
         private static void CopyFile(FileInfo source, FileInfo destination, CopyFileOptions options, CopyFileCallback callback, object state)
         {
 
-            if (source == null) throw new ArgumentNullException("source");
-            if (destination == null) throw new ArgumentNullException("destination");
-            if ((options & ~CopyFileOptions.All) != 0) throw new ArgumentOutOfRangeException("options");
+            if (source == null)                        throw new ArgumentNullException(nameof(source));
+            if (destination == null)                   throw new ArgumentNullException(nameof(destination));
+            if ((options & ~CopyFileOptions.ALL) != 0) throw new ArgumentOutOfRangeException(nameof(options));
             
-            CopyProgressRoutine cpr = callback == null ? null : new CopyProgressRoutine(new CopyProgressData(source, destination, callback, state).CallbackHandler);
+            var copyProgressRoutine = callback == null ? null : new CopyProgressRoutine(new CopyProgressData(source, destination, callback, state).CallbackHandler);
 
             bool cancel = false;
 
-            if (!CopyFileEx(source.FullName, destination.FullName, cpr, IntPtr.Zero, ref cancel, (int) options))
+            if (!CopyFileEx(source.FullName, destination.FullName, copyProgressRoutine, IntPtr.Zero, ref cancel, (int) options))
             {
                 throw new IOException(new Win32Exception().Message);
             }
@@ -61,54 +76,54 @@ namespace FileCompressionCopy.OrganizeFiles.Copy
 
         private class CopyProgressData
         {
-            private readonly FileInfo _source;
-            private readonly FileInfo _destination;
-            private readonly CopyFileCallback _callback;
-            private readonly object _state;
+            private FileInfo Source           { get; }
+            private FileInfo Destination      { get; }
+            private CopyFileCallback Callback { get; }
+            private object State              { get; }
 
+           
             public CopyProgressData(FileInfo source, FileInfo destination, CopyFileCallback callback, object state)
             {
-                _source = source;
-                _destination = destination;
-                _callback = callback;
-                _state = state;
+                Source      = source;
+                Destination = destination;
+                Callback    = callback;
+                State       = state;
             }
 
-            public int CallbackHandler(long totalFileSize, long totalBytesTransferred, long streamSize,
-                long streamBytesTransferred, int streamNumber, int callbackReason, IntPtr sourceFile,
-                IntPtr destinationFile, IntPtr data)
+            public int CallbackHandler
+            (long totalFileSize, long totalBytesTransferred, long streamSize, long streamBytesTransferred, int streamNumber, int callbackReason, IntPtr sourceFile, IntPtr destinationFile, IntPtr data)
             {
-                return (int) _callback(_source, _destination, _state, totalFileSize, totalBytesTransferred);
+                return (int) Callback(Source, Destination, State, totalFileSize, totalBytesTransferred);
             }
         }
 
-        private delegate int CopyProgressRoutine(long totalFileSize, long TotalBytesTransferred, long streamSize, long streamBytesTransferred, 
-            int streamNumber, int callbackReason, IntPtr sourceFile, IntPtr destinationFile, IntPtr data);
+        private delegate int CopyProgressRoutine
+        (long totalFileSize, long totalBytesTransferred, long streamSize, long streamBytesTransferred, int streamNumber, int callbackReason, IntPtr sourceFile, IntPtr destinationFile, IntPtr data);
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport("Kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        
         private static extern bool CopyFileEx(string lpExistingFileName, string lpNewFileName, CopyProgressRoutine lpProgressRoutine, IntPtr lpData, ref bool pbCancel, int dwCopyFlags);
     }
 
-    public delegate CopyFileCallbackAction CopyFileCallback(
-        FileInfo source, FileInfo destination, object state,
-        long totalFileSize, long totalBytesTransferred);
+    public delegate CopyFileCallbackAction CopyFileCallback
+        (FileInfo source, FileInfo destination, object state, long totalFileSize, long totalBytesTransferred);
 
     public enum CopyFileCallbackAction
     {
-        Continue = 0,
-        Cancel   = 1,
-        Stop     = 2,
-        Quiet    = 3
+        CONTINUE = 0,
+        CANCEL   = 1,
+        STOP     = 2,
+        QUIET    = 3
     }
 
     [Flags]
     public enum CopyFileOptions
     {
-        None                      = 0x0,
-        FailIfDestinationExists   = 0x1,
-        Restartable               = 0x2,
-        AllowDecryptedDestination = 0x8,
-        All                       = FailIfDestinationExists | Restartable | AllowDecryptedDestination
+        NONE                         = 0x0,
+        FAIL_IF_DESTINATION_EXISTS   = 0x1,
+        RESTARTABLE                  = 0x2,
+        ALLOW_DECRYPTED_DESTINATION  = 0x8,
+        ALL                          = FAIL_IF_DESTINATION_EXISTS | RESTARTABLE | ALLOW_DECRYPTED_DESTINATION
     }
 }

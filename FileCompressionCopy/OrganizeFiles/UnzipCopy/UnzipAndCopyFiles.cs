@@ -19,11 +19,11 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
         private static IProgress<double> Progress     { get; set; }
         private static ISessionManager SessionManager { get; set; }
 
-        public static void BeginCompressedFileExtraction(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config, ISessionManager sesMan)
+        public static void BeginCompressedFileExtraction(string fullFileName, string fileName, ILogger log, IProgress<double> prog, PluginConfiguration config, ISessionManager sessionManager)
         {
 
             Progress       = prog;
-            SessionManager = sesMan;
+            SessionManager = sessionManager;
 
             log.Info("Found New RAR File to Decompress: " + fileName);
 
@@ -64,7 +64,7 @@ namespace FileCompressionCopy.OrganizeFiles.UnzipCopy
             CurrentObjective.Progress = Math.Round(compressedPercent, 1);
             SessionManager.SendMessageToAdminSessions("ExtractionProgress", CurrentObjective, CancellationToken.None);
 
-            Progress.Report(Math.Round(compressedPercent, 1));
+            Progress.Report(CurrentObjective.Progress);
         }
 
         private static void FileMoveSuccess(object sender, ArchiveExtractionEventArgs<IArchiveEntry> e)

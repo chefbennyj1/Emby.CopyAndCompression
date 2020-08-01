@@ -18,15 +18,16 @@ namespace FileCompressionCopy
 {
     public class FileCompressionCopyScheduledTask : IScheduledTask, IConfigurableScheduledTask
     {
-        private ILogger logger           { get; set; }
-        private IFileSystem FileSystem   { get; }
-        private ILogManager LogManager   { get; }
-        private ISessionManager SessionManager { get; set; }
+        private ILogger logger                 { get; set; }
+        private IFileSystem FileSystem         { get; }
+        private ILogManager LogManager         { get; }
+        private ISessionManager SessionManager { get; }
+
         // ReSharper disable once TooManyDependencies
         public FileCompressionCopyScheduledTask(IFileSystem file, ILogManager logManager, ISessionManager sesMan)
         {
-            FileSystem  = file;
-            LogManager  = logManager;
+            FileSystem     = file;
+            LogManager     = logManager;
             SessionManager = sesMan;
         }
 
@@ -37,7 +38,6 @@ namespace FileCompressionCopy
             if (config.MonitoredFolder is null || config.EmbyAutoOrganizeFolderPath is null) return;
 
             logger = LogManager.GetLogger(Plugin.Instance.Name);
-
 
             var monitoredDirectoryInfo     = FileSystem.GetDirectories(path: config.MonitoredFolder);
 
@@ -51,13 +51,10 @@ namespace FileCompressionCopy
             {
                 //Ignore this directory if there is an 'extraction marker' file present because we have already extracted the contents of this folder.
                 if (FileSystem.FileExists(mediaFolder.FullName + "\\####emby.extracted####")) continue;
-                
 
                 logger.Info("New media folder: " + mediaFolder.FullName);
-
                 
                 CreateExtractionMarker(mediaFolder.FullName, logger);
-
 
                 var newMediaFiles = FileSystem.GetFiles(mediaFolder.FullName);
 
@@ -93,7 +90,7 @@ namespace FileCompressionCopy
                             logger.Info("Found new file to copy: " + file.Name);
                             await Task.Run(
                                 () => CopyFiles.BeginFileCopy(file.FullName, file.Name, progress,
-                                    Plugin.Instance.Configuration), cancellationToken);
+                                    Plugin.Instance.Configuration, SessionManager), cancellationToken);
 
                             config.CompletedItems.Add(new ExtractionInfo
                             {
@@ -112,28 +109,14 @@ namespace FileCompressionCopy
                 {
                     EmbyAutoOrganizeFolderPath = config.EmbyAutoOrganizeFolderPath,
                     MonitoredFolder            = config.MonitoredFolder,
-                    CompletedItems             = CleanUpCompletedItemsList(config.CompletedItems)
+                    CompletedItems             = config.CompletedItems.Where(i => i.completed > DateTime.Now.AddDays(-30)).ToList() //No need to keep a list of items that are 30 days old
                 });
             }
             
             progress.Report(100);
             
         }
-
-        private static List<ExtractionInfo> CleanUpCompletedItemsList(List<ExtractionInfo> completedItems)
-        {
-
-            foreach (var task in completedItems)
-            {
-                if (task.completed < DateTime.Now.AddDays(-30))
-                {
-                    completedItems.Remove(task);
-                }
-            }
-
-            return completedItems;
-        }
-
+        
         private static void CreateExtractionMarker(string folderPath, ILogger logger)
         {
             logger.Info("Creating extraction marker " + folderPath + "\\####emby.extracted####");
@@ -154,13 +137,9 @@ namespace FileCompressionCopy
         }
 
         public string Name        => "Decompression and copy media files";
-
         public string Description => "Unzip or Copy new files available in the configured watch folder into Emby's Auto Organize folder.";
-
         public string Category    => "Library";
-
         public string Key         => "FileCompressionCopy";
-
         public bool IsHidden      => false;
         public bool IsEnabled     => true;
         public bool IsLogged      => true;

@@ -12,6 +12,7 @@ namespace FileCompressionCopy
         {
             Instance = this;
         }
+        
 
         public void Dispose()
         {
