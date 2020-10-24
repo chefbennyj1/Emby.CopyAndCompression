@@ -63,7 +63,7 @@
 
                     dlg.querySelector('#folderBrowser').addEventListener('click',
                         (browser) => {
-                            
+                            Dashboard.showLoadingMsg();
                             var folderBrowser = dlg.querySelector('#folderBrowser');
 
                             folderBrowser.innerHTML = "";
@@ -79,6 +79,7 @@
                                                 folderBrowser.innerHTML += getDirectoryBrowserListItem(drive);
 
                                             });
+                                        Dashboard.hideLoadingMsg();
                                         })));
                                 } catch (err) {
                                     ApiClient.getJSON(
@@ -91,6 +92,7 @@
                                                         getDirectoryBrowserListItem(
                                                             drive);
                                                 });
+                                                Dashboard.hideLoadingMsg();
                                             });
                                     }
                                     break;
@@ -103,6 +105,7 @@
                                                 folderBrowser.innerHTML += getDirectoryBrowserListItem(drive);
 
                                             });
+                                            Dashboard.hideLoadingMsg();
                                         });
                                     path = browser.target.closest('div.listItem').dataset.path;
                                     break;
@@ -120,6 +123,7 @@
                                                     folderBrowser.innerHTML += getDirectoryBrowserListItem(drive);
 
                                                 });
+                                                Dashboard.hideLoadingMsg();
                                         });
                                     path = browser.target.closest('div.listItem').dataset.path;
                                     break;
@@ -172,8 +176,7 @@
             minutes = (minutes < 10) ? "0" + minutes : minutes;
               
             return days + " days " + hours + " hours " + minutes + " minutes ago";
-        }
-
+        }    
         
         function getCompletedTasksHtml(config) {
              
@@ -203,7 +206,7 @@
                 view.querySelector('#completedItems').innerHTML = getCompletedTasksHtml(config);
             }
 
-            loading.hide();
+            Dashboard.hideLoadingMsg();
 
         }
 
